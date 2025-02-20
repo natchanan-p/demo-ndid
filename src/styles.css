@@ -1,1 +1,47 @@
-/* You can add global styles to this file, and also import other style files */
+.ant-layout {
+  height: 100% !important;
+}
+
+nz-header {
+  height: 100px !important;;
+  background: #fff !important;;
+}
+
+nz-footer {
+  background-color: #002D63 !important;;
+  color: #fff !important;;
+}
+
+.inner-content {
+  background: #fff;
+  margin: 5%;
+  padding: 10%;
+  height: 80%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.txt-error {
+  font-weight: bold;
+  color: #ff4d4f;
+}
+
+.txt-success {
+  font-weight: bold;
+  color: #73d13d;
+}
+
+.logo {
+  width: 120px;
+  height: 31px;
+  margin: 20px 24px 16px 0;
+  float: left;
+}
+
+nz-footer {
+  text-align: center;
+}
+
+
