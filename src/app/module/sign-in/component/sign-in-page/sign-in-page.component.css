@@ -14,7 +14,7 @@ nz-breadcrumb {
 }
 
 nz-content {
-  padding: 0 50px;
+  padding: 0 5%;
 }
 
 nz-footer {
@@ -23,16 +23,67 @@ nz-footer {
 
 .inner-content {
   background: #fff;
-  margin: 10% auto;
-  padding: 10% 25%;
-  min-height: 500px;
+  margin: 5%;
+  padding: 10%;
+  max-width: 80%;
+  height: 80%;
+  display: flex;
+  justify-content: center; /* Centers content horizontally */
+  align-items: center; /* Centers content vertically */
+  flex-direction: column; /* Stack the content vertically */
 }
 
 nz-header {
-  background: lightgray;
   height: 100px;
+  background: #fff;
 }
 
 nz-form-control {
   padding: 10px;
 }
+
+span {
+  font-size: 15px;
+}
+
+.invalid {
+  color: red;
+}
+
+div {
+  margin-top: 10px;
+}
+
+.txt-error {
+  font-weight: bold;
+  color: #ff4d4f;
+}
+
+.txt-success {
+  font-weight: bold;
+  color: #73d13d;
+}
+
+
+.ant-btn-primary[disabled],
+.ant-btn-primary[disabled]:hover,
+.ant-btn-primary[disabled]:focus,
+.ant-btn-primary[disabled]:active {
+  color: #fff;
+  border-color: #1890ff;
+  background: #1890ff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+  opacity: 0.5;
+}
+
+.ant-layout {
+  height: 100% !important;
+}
+
+
+nz-footer {
+  background-color: #002D63;
+  color: #fff;
+}
+

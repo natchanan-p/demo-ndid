@@ -10,8 +10,8 @@ import {NzFormControlComponent, NzFormDirective, NzFormItemComponent, NzFormModu
 import {NzInputDirective, NzInputGroupComponent, NzInputModule} from 'ng-zorro-antd/input';
 import {NzButtonModule} from 'ng-zorro-antd/button';
 import {NzCheckboxModule} from 'ng-zorro-antd/checkbox';
-
-
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import {NzModalModule} from 'ng-zorro-antd/modal';
 
 
 @NgModule({
@@ -35,9 +35,12 @@ import {NzCheckboxModule} from 'ng-zorro-antd/checkbox';
     NzButtonModule,
     NzCheckboxModule,
     NzFormModule,
-    NzInputModule
-
+    NzInputModule,
+    NzIconModule,
+    NzModalModule
   ],
+  exports: [ SignInPageComponent],
   providers: [],
 })
+
 export class SignInModule { }
