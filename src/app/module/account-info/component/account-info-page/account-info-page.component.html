@@ -1,0 +1,58 @@
+<nz-layout>
+  <nz-header>
+<!--    <div class="logo">-->
+<!--      <img src="assets/image/logo-ttb.png" loading="lazy" alt="ttb-logo" class="d-block" width="100" height="50">-->
+<!--    </div>-->
+  </nz-header>
+  <nz-content>
+      <div class="main">
+        <div nz-row class="main-header">
+            <div nz-col nzSpan="24" class="avatar">
+              <nz-avatar [nzSize]="200" nzIcon="user"></nz-avatar>
+            </div>
+          <div nz-col nzSpan="24" class="username">
+            <span>{{username}}</span>
+          </div>
+          <div nz-col nzSpan="24" class="txt-center" style="margin-top: 25%">
+            <button nz-button class="login-form-button login-form-margin w-50" [nzType]="'primary'" (click)="logout()">Logout</button>
+
+          </div>
+
+        </div>
+
+
+
+        <!--          <nz-list nzBordered nzHeader="{{ACCOUNT_INFO.PERSONAL_INFO}}">-->
+<!--              <nz-list-item>-->
+<!--                <span class="ant-flex-align-flex-start">Username</span>-->
+<!--              </nz-list-item>-->
+<!--              <nz-list-item>-->
+<!--                  <span class="ant-flex-align-flex-start">{{ACCOUNT_INFO.TITLE_NAME}}</span>-->
+<!--                  <span class="ant-flex-align-flex-end">น.ส.</span>-->
+<!--              </nz-list-item>-->
+<!--              <nz-list-item>-->
+<!--                <span class="ant-flex-align-flex-start">{{ACCOUNT_INFO.NAME_THAI}}</span>-->
+<!--                <span class="ant-flex-align-flex-end">ณัฐชานันท์</span>-->
+<!--              </nz-list-item>-->
+<!--            <nz-list-item>-->
+<!--              <span class="ant-flex-align-flex-start">{{ACCOUNT_INFO.LNAME_THAI}}</span>-->
+<!--              <span class="ant-flex-align-flex-end">ปัทมฤทธิ์เดชโยธี</span>-->
+<!--            </nz-list-item>-->
+<!--            <nz-list-item>-->
+<!--              <span class="ant-flex-align-flex-start">{{ACCOUNT_INFO.NAME_ENG}}</span>-->
+<!--              <span class="ant-flex-align-flex-end">NATCHANAN</span>-->
+<!--            </nz-list-item>-->
+<!--            <nz-list-item>-->
+<!--              <span class="ant-flex-align-flex-start">{{ACCOUNT_INFO.LNAME_ENG}}</span>-->
+<!--              <span class="ant-flex-align-flex-end">PATHMARITDECHYOTHEE</span>-->
+<!--            </nz-list-item>-->
+<!--            <nz-list-item>-->
+<!--              <span class="ant-flex-align-flex-start">{{ACCOUNT_INFO.BIRTH_DATE}}</span>-->
+<!--              <span class="ant-flex-align-flex-end">10 เม.ย. 2539</span>-->
+<!--            </nz-list-item>-->
+<!--          </nz-list>-->
+      </div>
+  </nz-content>
+<!--  <nz-footer> ธนาคารทหารไทยธนชาต จำกัด (มหาชน)</nz-footer>-->
+</nz-layout>
+

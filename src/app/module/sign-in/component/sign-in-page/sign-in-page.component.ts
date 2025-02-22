@@ -101,6 +101,7 @@ export class SignInPageComponent implements OnInit {
         next: (result) => {
           console.log('ได้รับ result:', result); // ตรวจสอบ result
           this.dataService.set('token', result.token);
+          this.dataService.set('currentUser', result.username)
           this.message = result; // อัปเดต message
           this.loading = false;
         },
