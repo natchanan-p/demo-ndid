@@ -8,7 +8,7 @@ import { registerLocaleData } from '@angular/common';
 import en from '@angular/common/locales/en';
 import { FormsModule } from '@angular/forms';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient } from '@angular/common/http';
+import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import * as AllIcons from '@ant-design/icons-angular/icons';
 import { IconDefinition } from '@ant-design/icons-angular';
 import { NZ_ICONS } from 'ng-zorro-antd/icon';
@@ -31,7 +31,7 @@ const icons: IconDefinition[] = Object.keys(antDesignIcons).map(key => antDesign
     { provide: NZ_I18N, useValue: en_US },
     { provide: NZ_ICONS, useValue: icons },
     provideAnimationsAsync(),
-    provideHttpClient()
+    provideHttpClient(withInterceptorsFromDi())
   ],
 })
 

@@ -28,7 +28,8 @@
                   </nz-input-group>
 
                 </nz-form-control>
-
+                <div *ngIf="loading">กำลังดำเนินการ...</div>
+                <div *ngIf="message">{{ message }}</div>
 <!--                <div nz-col nzSpan="24" style="padding: 10px">-->
 <!--                  <span [ngClass]="{-->
 <!--                          'txt-error': form.controls['password'].hasError('minlength') && form.controls['password'].value.length > 0,-->

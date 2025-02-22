@@ -2,6 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {NzModalService} from 'ng-zorro-antd/modal';
 import Swal from 'sweetalert2'
+import {HttpClient} from '@angular/common/http';
+import {AuthService} from '../../../../service/auth/auth.service';
+import {DataService} from '../../../../service/data-service/data-service.service';
+import {Router} from '@angular/router';
 
 
 @Component({
@@ -21,10 +25,16 @@ export class SignInPageComponent implements OnInit {
   statusHaveEng: boolean = true;
   statusHaveNumber: boolean = true;
   statusHaveSpecialChr: boolean = true;
+  loading = false;
+  message = '';
 
   constructor(
     private fb: FormBuilder,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private authService: AuthService,
+    private http: HttpClient,
+    private dataService: DataService,
+    private router: Router,
   ) {
     this.form = this.fb.group({
       username: ['', [
@@ -52,6 +62,7 @@ export class SignInPageComponent implements OnInit {
   }
 
   submitForm() {
+    this.loading = true;
 
     // this.form.controls['password'].addValidators([Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/g)])
 
@@ -83,10 +94,51 @@ export class SignInPageComponent implements OnInit {
           confirmButtonText: 'ปิด'
         });
     } else {
-      this.encryptPassword().then((result) => {
-        console.log(result);
-      })
+      const username = this.form.controls['username'].value;
+      const password = this.form.controls['password'].value;
+
+      this.authService.signIn(username, password).subscribe({
+        next: (result) => {
+          console.log('ได้รับ result:', result); // ตรวจสอบ result
+          this.dataService.set('token', result.token);
+          this.message = result; // อัปเดต message
+          this.loading = false;
+        },
+        error: (error) => {
+          this.message = 'เกิดข้อผิดพลาดในการเรียก API';
+          this.loading = false;
+        },
+        complete: () => {
+          console.log('กระบวนการเสร็จสิ้น'); // ตรวจสอบ complete
+          this.message = 'กำลังเปลี่ยนไปหน้า info';
+          this.navigateToInfo();
+        },
+      });
+      // console.log('กำลังเรียกไปที่ api')
+      // this.authService.signIn(username, password).subscribe({
+      //   next: (result) => {
+      //     console.log('next')
+      //     this.message = result;
+      //     this.loading = false;
+      //   },
+      //   error: (error) => {
+      //     this.message = 'เกิดข้อผิดพลาดในการเรียก API';
+      //     this.loading = false;
+      //   },
+      //   complete: () => {
+      //     this.message = 'กำลังเปลี่ยนไปหน้า info';
+      //     // ทำการเปลี่ยนหน้าไปที่ info หลังจากเสร็จสิ้น
+      //     // this.navigateToInfo();
+      //   },
+      // })
+      // this.encryptPassword().then((result) => {
+      //   console.log(result);
+      // })
     }
+  }
+
+  navigateToInfo() {
+    this.router.navigate(['/account-info']);
   }
 
   validateShowButton() {

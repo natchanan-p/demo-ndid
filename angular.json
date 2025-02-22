@@ -33,7 +33,9 @@
               "src/styles.css",
               "src/output.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/crypto-js/crypto-js.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -88,7 +90,9 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/crypto-js/crypto-js.js"
+            ]
           }
         }
       }
