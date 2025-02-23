@@ -6,6 +6,7 @@ import {HttpClient} from '@angular/common/http';
 import {AuthService} from '../../../../service/auth/auth.service';
 import {DataService} from '../../../../service/data-service/data-service.service';
 import {Router} from '@angular/router';
+import {concatMap, delay, of, switchMap, tap} from 'rxjs';
 
 
 @Component({
@@ -62,7 +63,7 @@ export class SignInPageComponent implements OnInit {
   }
 
   submitForm() {
-    this.loading = true;
+    // this.loading = true;
 
     // this.form.controls['password'].addValidators([Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/g)])
 
@@ -96,25 +97,66 @@ export class SignInPageComponent implements OnInit {
     } else {
       const username = this.form.controls['username'].value;
       const password = this.form.controls['password'].value;
+      const authProcess$ = of('กำลังเรียก API').pipe(
+        tap((message) => {
+          this.message = message; // อัปเดตข้อความ
+        }),
+        delay(3000), // delay 3 วินาที
+        concatMap(() => {
+          // เรียก API
+          return this.authService.signIn(username, password).pipe(
+            switchMap((response) => {
+              // แสดงข้อความ "ได้รับ Token" และ delay 3 วินาที
+              this.message = `ได้รับ Token`;
+              // บันทึก token และ currentUser
+              this.dataService.set('token', response.token);
+              this.dataService.set('currentUser', response.username);
 
-      this.authService.signIn(username, password).subscribe({
+              return of(response).pipe(delay(3000)); // delay 3 วินาที
+            })
+          );
+        }),
+        concatMap((response) => {
+          // แสดงข้อความ "กำลังเปลี่ยนไปหน้า info" และ delay 3 วินาที
+          this.message = 'กำลังเปลี่ยนไปหน้า info';
+          return of(response).pipe(delay(3000)); // delay 3 วินาที
+        })
+      );
+
+      authProcess$.subscribe({
         next: (result) => {
-          console.log('ได้รับ result:', result); // ตรวจสอบ result
-          this.dataService.set('token', result.token);
-          this.dataService.set('currentUser', result.username)
-          this.message = result; // อัปเดต message
-          this.loading = false;
+          console.log('กระบวนการสำเร็จ:', result); // ตรวจสอบผลลัพธ์
         },
         error: (error) => {
           this.message = 'เกิดข้อผิดพลาดในการเรียก API';
           this.loading = false;
+          console.error(error); // แสดงข้อผิดพลาด
         },
         complete: () => {
-          console.log('กระบวนการเสร็จสิ้น'); // ตรวจสอบ complete
-          this.message = 'กำลังเปลี่ยนไปหน้า info';
-          this.navigateToInfo();
+          this.navigateToInfo(); // เปลี่ยนไปหน้า info
         },
       });
+
+      //
+      // this.authService.signIn(username, password).subscribe({
+      //   next: (result) => {
+      //     console.log('ได้รับ result:', result); // ตรวจสอบ result
+      //     this.dataService.set('token', result.token);
+      //     this.dataService.set('currentUser', result.username)
+      //     this.message = result; // อัปเดต message
+      //     this.loading = false;
+      //   },
+      //   error: (error) => {
+      //     this.message = 'เกิดข้อผิดพลาดในการเรียก API';
+      //     this.loading = false;
+      //     throw error;
+      //   },
+      //   complete: () => {
+      //     console.log('กระบวนการเสร็จสิ้น'); // ตรวจสอบ complete
+      //     this.message = 'กำลังเปลี่ยนไปหน้า info';
+      //     this.navigateToInfo();
+      //   },
+      // });
       // console.log('กำลังเรียกไปที่ api')
       // this.authService.signIn(username, password).subscribe({
       //   next: (result) => {

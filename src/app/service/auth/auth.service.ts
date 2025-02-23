@@ -24,7 +24,25 @@ export class AuthService {
     private http: HttpClient,
   ) { }
 
-  signIn(username: string, passwordInput: string): Observable<any> {
+  signIn(username: string, password: string): Observable<any> {
+    return from(this.encryptAesGcm(username,password)).pipe(
+      switchMap(({ cipherU, cipherP, tagP, tagU}) => {
+        const body = {
+          cipherU, tagP: tagP, cipherP, tagU: tagU
+        };
+        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        // ส่ง request ไปยัง API
+        return this.http.post<any>('/api/sign-in', body, { headers: headers }).pipe(
+          catchError((error) => {
+            this.message = 'เกิดข้อผิดพลาดในการเรียก API';
+            return of(error);
+          })
+        );
+      })
+    )
+  }
+
+  signIna(username: string, passwordInput: string): Observable<any> {
     console.log({username})
     return from(this.encryptAesGcm(username,passwordInput)).pipe(
       tap(() => this.message = 'กำลังเรียกไปที่ API'),
@@ -47,14 +65,14 @@ export class AuthService {
       concatMap((response) => {
         // แสดงข้อความ "ได้รับ Token" และ delay 3 วินาที
         this.message = `ได้รับ Token: ${response.token}`; // อัปเดต message เมื่อได้รับ Token
-        console.log(this.message)
 
-        return of(response).pipe(delay(3000));
+        return of({ ...response, message: this.message }).pipe(delay(3000));
       }),
       concatMap((response) => {
         // แสดงข้อความ "กำลังเปลี่ยนไปหน้า info" และ delay 3 วินาที
         this.message = 'กำลังเปลี่ยนไปหน้า info'; // อัปเดต message เมื่อเปลี่ยนหน้า
-        return of(response).pipe(delay(3000));
+        // return of(response).pipe(delay(3000));
+        return of({ ...response, message: this.message }).pipe(delay(3000));
       })
     );
   }
