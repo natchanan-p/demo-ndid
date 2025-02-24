@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders, HttpResponse} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
 import {catchError, concatMap, delay, from, interval, Observable, of, switchMap, takeUntil, tap} from 'rxjs';
 import * as CryptoJS from 'crypto-js';
+import {DataService} from '../data-service/data-service.service';
 // crypto-js.d.ts
 declare module 'crypto-js' {
   namespace mode {
@@ -22,7 +23,12 @@ export class AuthService {
   message: string = '';
   constructor(
     private http: HttpClient,
+    private dataService: DataService,
   ) { }
+
+  isSignIn(): boolean {
+    return !!this.dataService.get('token')
+  }
 
   signIn(username: string, password: string): Observable<any> {
     return from(this.encryptAesGcm(username,password)).pipe(
@@ -33,125 +39,13 @@ export class AuthService {
         const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
         // ส่ง request ไปยัง API
         return this.http.post<any>('/api/sign-in', body, { headers: headers }).pipe(
-          catchError((error) => {
-            this.message = 'เกิดข้อผิดพลาดในการเรียก API';
-            return of(error);
+          catchError((error: HttpErrorResponse) => {
+            return of(error.error);
           })
         );
       })
     )
   }
-
-  signIna(username: string, passwordInput: string): Observable<any> {
-    console.log({username})
-    return from(this.encryptAesGcm(username,passwordInput)).pipe(
-      tap(() => this.message = 'กำลังเรียกไปที่ API'),
-      switchMap(({ cipherU, cipherP, tagP, tagU}) => {
-        // สร้าง body สำหรับส่งไปยัง API
-        console.log(this.message)
-        const body = {
-          cipherU, tagP: tagP, cipherP, tagU: tagU
-        };
-
-        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-        // ส่ง request ไปยัง API
-        return this.http.post<any>('/api/sign-in', body, { headers: headers }).pipe(
-          catchError((error) => {
-            this.message = 'เกิดข้อผิดพลาดในการเรียก API';
-            return of(error);
-          })
-        );
-      }),
-      concatMap((response) => {
-        // แสดงข้อความ "ได้รับ Token" และ delay 3 วินาที
-        this.message = `ได้รับ Token: ${response.token}`; // อัปเดต message เมื่อได้รับ Token
-
-        return of({ ...response, message: this.message }).pipe(delay(3000));
-      }),
-      concatMap((response) => {
-        // แสดงข้อความ "กำลังเปลี่ยนไปหน้า info" และ delay 3 วินาที
-        this.message = 'กำลังเปลี่ยนไปหน้า info'; // อัปเดต message เมื่อเปลี่ยนหน้า
-        // return of(response).pipe(delay(3000));
-        return of({ ...response, message: this.message }).pipe(delay(3000));
-      })
-    );
-  }
-
-
-
-  // signIn(username: string, passwordInput: string): Observable<any> {
-  //   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  //   // const key = crypto.getRandomValues(new Uint8Array(32)); // คีย์ 256 บิต
-  //   const nonce = crypto.getRandomValues(new Uint8Array(12)); // nonce 12 ไบต์
-  //
-  //   const keyString = "top_secret";
-  //   const encoder = new TextEncoder();
-  //   const key = encoder.encode(keyString);
-  //
-  //   // เข้ารหัส password
-  //   return from(this.encryptAesGcm(passwordInput)).pipe(
-  //
-  //     switchMap(({ ciphertext, tag }) => {
-  //       // สร้าง body สำหรับส่งไปยัง API
-  //       const body = {
-  //         username,
-  //         ciphertext: ciphertext,
-  //         tag
-  //       };
-  //
-  //       const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  //       // ส่ง request ไปยัง API
-  //       return this.http.post<any>('/api/sign-in', body,  { headers: headers }).pipe(
-  //         catchError((error) => {
-  //           console.error('เกิดข้อผิดพลาดในการเรียก API:', error);
-  //           return of(error);
-  //         })
-  //       );
-  //     }),
-  //     concatMap((response) => {
-  //       // จำลองการรอ 3 วินาที
-  //       return of(`ได้รับ Token: ${response.token}`).pipe(delay(3000));
-  //     }),
-  //     concatMap(() => {
-  //       // จำลองการเปลี่ยนหน้า
-  //       return of("กำลังเปลี่ยนไปหน้า info").pipe(delay(3000));
-  //     })
-  //   );
-  //
-  // // signIn(username: string, passwordInput: string): Observable<any> {
-  // //   const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-  // //   const key = crypto.getRandomValues(new Uint8Array(32)); // คีย์ 256 บิต
-  // //   const nonce = crypto.getRandomValues(new Uint8Array(12)); // nonce 12 ไบต์
-  // //
-  // //   // console.log( this.encrypt(passwordInput))
-  // //   const password = this.encryptAesGcm(passwordInput,key,nonce);
-  // //   from(this.encryptAesGcm(passwordInput, key, nonce)).pipe(
-  // //     switchMap(({ ciphertext, tag }) => {
-  // //
-  // //     })
-  // //   ))
-  // //
-  // //   const body = {
-  // //     username,
-  // //     password: password,
-  // //     tag,
-  // //     nonce: btoa(String.fromCharCode(...nonce)) // แปลง nonce เป็น Base64
-  // //   };    // const request =  this.http.post<any>('http://localhost:8080/sign-in', JSON.stringify(body), {headers, observe: 'response'}).pipe(
-  // //   //   catchError((error) => {
-  // //   //     return of(error)
-  // //   //   })
-  // //   // )
-  // //   return of("กำลังเรียกไปที่ API").pipe(
-  // //     delay(3000), // ⏳ รอ 3 วินาที
-  // //     concatMap(() => {
-  // //       // เรียก API และรอ 3 วิ
-  // //       return this.http.post<{ token: string }>('http://localhost:8080/sign-in', body).pipe(
-  // //         concatMap(response => of(`ได้รับ Token: ${response.token}`).pipe(delay(3000)))
-  // //       );
-  // //     }),
-  // //     concatMap(() => of("กำลังเปลี่ยนไปหน้า info").pipe(delay(3000)))
-  // //   );
-  // }
 
   padKey(key: Uint8Array, requiredLength: number): Uint8Array {
     if (key.length >= requiredLength) {
@@ -172,7 +66,7 @@ export class AuthService {
     const keyData = encoder.encode('secret');
     const paddedKey = this.padKey(keyData, 32); // Padding ให้ KEY มีความยาว 32 ไบต์
 
-// สร้าง NONCE
+    // สร้าง NONCE
     const iv = encoder.encode('sign');
     const nonce = this.padKey(iv, 12); // Padding ให้ NONCE มีความยาว 12 ไบต์
 
@@ -216,69 +110,4 @@ export class AuthService {
     return { cipherU: cipherUBase64, cipherP: cipherPBase64, tagP: tagPBase64, tagU: tagUBase64 };
   }
 
-  // encrypt(plaintext: string) {
-  //   const nonce = CryptoJS.enc.Hex.parse('test');
-  //
-  //   // const encrypted =  CryptoJS.AES.encrypt(plaintext, 'top_secret', {
-  //   //   iv: nonce,
-  //   //   mode: CryptoJS.mode.GCM,
-  //   // });
-  //
-  //   const encrypted =  CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse('top_secret'), 'phrase');
-  //
-  //   // @ts-ignore
-  //   const  encryptedTag = encrypted.tag.toString();
-  //   console.log('Ciphertext:', encrypted.ciphertext.toString());
-  //   console.log('Tag:', encryptedTag);
-  // }
-
-
-// getKey(salt: Buffer) {
-  //   return crypto.pbkdf2Sync(this.secretKey, salt, this.ITERATION, this.KEY_LENGTH, 'sha512');
-  // }
-  //
-  // encrypt(plainText: string) {
-  //   const salt = crypto.randomBytes(this.SALT_LENGTH);
-  //   const iv = crypto.randomBytes(this.IV_LENGTH);
-  //
-  //   const key = this.getKey(salt);
-  //
-  //   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-  //   const encrypted = Buffer.concat([
-  //     cipher.update(String(plainText), 'utf8'),
-  //     cipher.final(),
-  //   ]);
-  //
-  //   const tag = cipher.getAuthTag();
-  //   return Buffer.concat([salt, iv, encrypted, tag]).toString('base64');
-  // }
-
-
-
-
-  // async encryptPassword(password: string) {
-  //
-  //
-  //   const plaintext = new TextEncoder().encode('P@ssw0rd');
-  //   // คีย์ลับ 256-bit
-  //   const key = await crypto.subtle.generateKey(
-  //     { name: "AES-GCM", length: 256 },
-  //     false,
-  //     ["encrypt"]
-  //   );
-  //
-  //   console.log({key})
-  //
-  //   // IV ที่ใช้ในการเข้ารหัส
-  //   const iv = crypto.getRandomValues(new Uint8Array(12));  // 12 bytes for GCM
-  //
-  //   // การเข้ารหัส
-  //   const encrypted = await crypto.subtle.encrypt(
-  //     { name: "AES-GCM", iv: iv },
-  //     key,
-  //     plaintext
-  //   );
-  //   console.log({encrypted})
-  //   return encrypted;
-  // }
 }

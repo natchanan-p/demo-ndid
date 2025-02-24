@@ -2,11 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {NzModalService} from 'ng-zorro-antd/modal';
 import Swal from 'sweetalert2'
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpResponse} from '@angular/common/http';
 import {AuthService} from '../../../../service/auth/auth.service';
 import {DataService} from '../../../../service/data-service/data-service.service';
 import {Router} from '@angular/router';
-import {concatMap, delay, of, switchMap, tap} from 'rxjs';
+import {catchError, concatMap, delay, of, switchMap, tap, throwError} from 'rxjs';
+import {ExceptionHandler} from 'winston';
 
 
 @Component({
@@ -63,7 +64,7 @@ export class SignInPageComponent implements OnInit {
   }
 
   submitForm() {
-    // this.loading = true;
+    this.loading = true;
 
     // this.form.controls['password'].addValidators([Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/g)])
 
@@ -99,41 +100,45 @@ export class SignInPageComponent implements OnInit {
       const password = this.form.controls['password'].value;
       const authProcess$ = of('กำลังเรียก API').pipe(
         tap((message) => {
-          this.message = message; // อัปเดตข้อความ
+          this.message = message;
         }),
-        delay(3000), // delay 3 วินาที
+        delay(3000),
         concatMap(() => {
-          // เรียก API
           return this.authService.signIn(username, password).pipe(
-            switchMap((response) => {
-              // แสดงข้อความ "ได้รับ Token" และ delay 3 วินาที
-              this.message = `ได้รับ Token`;
-              // บันทึก token และ currentUser
-              this.dataService.set('token', response.token);
-              this.dataService.set('currentUser', response.username);
+            switchMap((response: any) => {
+              console.log({response});
+              if (response.errorCode === 200) {
+                // บันทึก token และ currentUser
+                this.message = 'ได้รับ Token';
+                this.dataService.set('token', response.token);
+                this.dataService.set('currentUser', response.username);
 
+              } else {
+                this.loading = false;
+                this.message = response.detail;
+
+              }
               return of(response).pipe(delay(3000)); // delay 3 วินาที
+
             })
           );
         }),
-        concatMap((response) => {
-          // แสดงข้อความ "กำลังเปลี่ยนไปหน้า info" และ delay 3 วินาที
-          this.message = 'กำลังเปลี่ยนไปหน้า info';
+        concatMap((response: any) => {
+          if (response.errorCode === 200) {
+            this.message = 'กำลังเปลี่ยนไปหน้า info';
+          }
           return of(response).pipe(delay(3000)); // delay 3 วินาที
         })
+
       );
 
       authProcess$.subscribe({
         next: (result) => {
-          console.log('กระบวนการสำเร็จ:', result); // ตรวจสอบผลลัพธ์
-        },
-        error: (error) => {
-          this.message = 'เกิดข้อผิดพลาดในการเรียก API';
+          this.message = '';
           this.loading = false;
-          console.error(error); // แสดงข้อผิดพลาด
         },
         complete: () => {
-          this.navigateToInfo(); // เปลี่ยนไปหน้า info
+          this.navigateToInfo();
         },
       });
 
