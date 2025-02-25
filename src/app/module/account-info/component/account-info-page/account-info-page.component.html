@@ -1,0 +1,24 @@
+<nz-layout>
+  <nz-header>
+  </nz-header>
+  <nz-content>
+      <div class="main">
+        <div nz-row class="main-header">
+            <div nz-col nzSpan="24" class="avatar">
+              <nz-avatar [nzSize]="200" nzIcon="user"></nz-avatar>
+            </div>
+          <div nz-col nzSpan="24" class="username">
+            <span>{{username}}</span>
+          </div>
+          <div nz-col nzSpan="24" class="txt-center" style="margin-top: 10%">
+            <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'" (click)="logout()">Logout</button>
+
+          </div>
+
+        </div>
+
+
+      </div>
+  </nz-content>
+</nz-layout>
+

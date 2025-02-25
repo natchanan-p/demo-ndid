@@ -2,6 +2,12 @@ import {Component, OnInit} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {NzModalService} from 'ng-zorro-antd/modal';
 import Swal from 'sweetalert2'
+import {HttpClient, HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {AuthService} from '../../../../service/auth/auth.service';
+import {DataService} from '../../../../service/data-service/data-service.service';
+import {Router} from '@angular/router';
+import { concatMap, delay, of, switchMap, tap} from 'rxjs';
+
 
 
 @Component({
@@ -21,26 +27,37 @@ export class SignInPageComponent implements OnInit {
   statusHaveEng: boolean = true;
   statusHaveNumber: boolean = true;
   statusHaveSpecialChr: boolean = true;
+  loading = false;
+  message = '';
 
   constructor(
     private fb: FormBuilder,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private authService: AuthService,
+    private http: HttpClient,
+    private dataService: DataService,
+    private router: Router,
+    private modal: NzModalService
   ) {
     this.form = this.fb.group({
-      username: ['', [
-        Validators.required,
-        Validators.pattern(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)  // Correct regular expression
-      ]],
-      password: ['',
-        [Validators.required,
-         Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/)]
-      ]
+      username: ['', {
+        validators: [
+          Validators.required,
+          Validators.pattern(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+        ],
+        updateOn: 'blur'
+      }],
+      password: ['', {
+        validators: [
+          Validators.required,
+          Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/)
+        ],
+        updateOn: 'blur'
+      }]
     });
-  // (?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}
   }
 
   ngOnInit() {
-    console.log('SignInPageComponent ngOnInit');
   }
 
   validateUsername() {
@@ -51,14 +68,16 @@ export class SignInPageComponent implements OnInit {
     }
   }
 
-  submitForm() {
-
-    // this.form.controls['password'].addValidators([Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/g)])
-
+  validatePassword() {
     const regExpNumber =  RegExp (/(?=.*\d).+$/);
     this.statusHaveNumber = regExpNumber.test(this.form.controls['password'].value);
     const regExpSpecialChr =  RegExp (/(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/|\\`~]).+/);
     this.statusHaveSpecialChr =  regExpSpecialChr.test(this.form.controls['password'].value);
+
+  }
+
+  submitForm() {
+    this.loading = true;
 
     if(this.form.controls['password'].invalid) {
         let content = '';
@@ -73,48 +92,68 @@ export class SignInPageComponent implements OnInit {
           content += '<br>'+this.txtErrorPasswordMin8
         }
 
-        // if(this.statusHaveNumber || this.statusHaveSpecialChr || this.form.controls['password'].value.length) {
-        //   content += '<br>'+this.txtErrorPasswordMin8
-        // }
-        Swal.fire({
-          title: "รหัสผ่านไม่ปลอดภัย",
-          html: content,
-          icon: "error",
-          confirmButtonText: 'ปิด'
-        });
+      this.modal.error({
+        nzTitle: 'รหัสผ่านไม่ปลอดภัย',
+        nzContent: content,
+        nzOkText: 'ตกลง',
+        nzCentered: true
+      });
+        this.loading = false;
+
     } else {
-      this.encryptPassword().then((result) => {
-        console.log(result);
-      })
+      const username = this.form.controls['username'].value;
+      const password = this.form.controls['password'].value;
+      const authProcess$ = of('กำลังเรียก API').pipe(
+        tap((message) => {
+          this.message = message;
+        }),
+        delay(3000),
+        concatMap(() => {
+          return this.authService.signIn(username, password).pipe(
+            switchMap((response: any) => {
+              console.log({response});
+              if (response.errorCode === 200) {
+                this.message = 'ได้รับ Token';
+                this.dataService.set('token', response.token);
+                this.dataService.set('currentUser', response.username);
+
+              } else {
+                this.loading = false;
+                this.message = response.detail;
+
+              }
+              return of(response).pipe(delay(3000));
+
+            })
+          );
+        }),
+        concatMap((response: any) => {
+          if (response.errorCode === 200) {
+            this.message = 'กำลังเปลี่ยนไปหน้า info';
+          }
+          return of(response).pipe(delay(3000));
+        })
+
+      );
+
+      authProcess$.subscribe({
+        next: (result) => {
+          this.message = '';
+          this.loading = false;
+        },
+        complete: () => {
+          this.navigateToInfo();
+        },
+      });
     }
+  }
+
+  navigateToInfo() {
+    this.router.navigate(['/account-info']);
   }
 
   validateShowButton() {
     return this.form.controls['username'].invalid || this.form.controls['password'].invalid || !this.statusHaveNumber || !this.statusHaveSpecialChr;
-  }
-
-  async encryptPassword() {
-    const plaintext = new TextEncoder().encode("Hello, world!");
-    // คีย์ลับ 256-bit
-    const key = await crypto.subtle.generateKey(
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["encrypt"]
-    );
-
-    console.log({key})
-
-    // IV ที่ใช้ในการเข้ารหัส
-    const iv = crypto.getRandomValues(new Uint8Array(12));  // 12 bytes for GCM
-
-    // การเข้ารหัส
-    const encrypted = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      plaintext
-    );
-    console.log({encrypted})
-    return encrypted;
   }
 
 }

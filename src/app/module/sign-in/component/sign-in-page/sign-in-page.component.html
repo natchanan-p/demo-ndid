@@ -1,3 +1,8 @@
+<div class="overlay" *ngIf="loading">
+  <nz-spin nzTip="{{message}}" nzSize="large">
+  </nz-spin>
+</div>
+
 <nz-layout>
   <nz-header>
     <div class="logo">
@@ -6,6 +11,7 @@
   </nz-header>
   <nz-content>
     <div class="inner-content">
+
       <div style="display:contents ">
         <form nz-form [formGroup]="form" class="login-form" (ngSubmit)="submitForm()">
 
@@ -15,7 +21,7 @@
               <div nz-col nzSpan="24">
                 <nz-form-control [nzErrorTip]="txtErrorUsername" nzSpan="24">
                   <nz-input-group nzPrefixIcon="user">
-                    <input type="text" nz-input formControlName="username" placeholder="Username" (keyup)="validateUsername()" />
+                    <input type="text" nz-input formControlName="username" placeholder="Username" (blur)="validateUsername()" />
                   </nz-input-group>
                 </nz-form-control>
 
@@ -23,30 +29,12 @@
               <div nz-col nzSpan="24">
                 <nz-form-control>
                   <nz-input-group nzPrefixIcon="lock">
-                    <input type="password" nz-input formControlName="password" placeholder="Password"/>
-
+                    <input type="password" nz-input formControlName="password" placeholder="Password"  (blur)="validatePassword()" />
                   </nz-input-group>
-
                 </nz-form-control>
 
-<!--                <div nz-col nzSpan="24" style="padding: 10px">-->
-<!--                  <span [ngClass]="{-->
-<!--                          'txt-error': form.controls['password'].hasError('minlength') && form.controls['password'].value.length > 0,-->
-<!--                          'txt-success': form.controls['password'].valid && form.controls['password'].value.length > 0-->
-<!--                        }">{{txtErrorPasswordMin8}}</span> <br>-->
-<!--                  <span [ngClass]="{  'txt-error': !statusHaveNumber && form.controls['password'].value.length > 0,-->
-<!--                                      'txt-success': statusHaveNumber && form.controls['password'].value.length > 0 }" >-->
-<!--                    {{txtErrorPasswordNumber}}-->
-<!--                  </span> <br>-->
-<!--                  <span [ngClass]="{  'txt-error': !statusHaveSpecialChr && form.controls['password'].value.length > 0,-->
-<!--                                      'txt-success': statusHaveSpecialChr && form.controls['password'].value.length > 0 }">-->
-<!--                    {{txtErrorPasswordSpecialChr}}-->
-<!--                  </span> <br>-->
-
-<!--                </div>-->
                 <div nz-col [nzSpan]="12" style="margin: 20px auto; display: table;" >
                   <button nz-button class="login-form-button login-form-margin w-100" [nzType]="'primary'"
-                          [disabled]="form.controls['username'].invalid"
                           type="submit">Sign in</button>
                 </div>
 
@@ -56,8 +44,13 @@
           </nz-form-item>
 
         </form>
+        <h4 *ngIf="!loading" class="txt-error">{{message}}</h4>
+
       </div>
     </div>
+
+
+
   </nz-content>
   <nz-footer> ธนาคารทหารไทยธนชาต จำกัด (มหาชน)</nz-footer>
 </nz-layout>

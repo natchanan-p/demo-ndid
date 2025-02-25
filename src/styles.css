@@ -13,10 +13,10 @@ nz-footer {
 }
 
 .inner-content {
-  background: #fff;
-  margin: 5%;
+  /*background: #fff;*/
+  /*margin: 5%;*/
   padding: 10%;
-  height: 80%;
+  height: 90%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,6 +33,10 @@ nz-footer {
   color: #73d13d;
 }
 
+.txt-center {
+  text-align: center;
+}
+
 .logo {
   width: 120px;
   height: 31px;
@@ -42,6 +46,21 @@ nz-footer {
 
 nz-footer {
   text-align: center;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.w-50 {
+  width: 50%;
+}
+
+::ng-deep .swal2-container {
+  position: fixed;
+  z-index: 9999;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 

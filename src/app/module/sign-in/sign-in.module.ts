@@ -12,6 +12,8 @@ import {NzButtonModule} from 'ng-zorro-antd/button';
 import {NzCheckboxModule} from 'ng-zorro-antd/checkbox';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import {NzModalModule} from 'ng-zorro-antd/modal';
+import {NzSpinComponent} from 'ng-zorro-antd/spin';
+import {NzAlertComponent} from 'ng-zorro-antd/alert';
 
 
 @NgModule({
@@ -37,7 +39,9 @@ import {NzModalModule} from 'ng-zorro-antd/modal';
     NzFormModule,
     NzInputModule,
     NzIconModule,
-    NzModalModule
+    NzModalModule,
+    NzSpinComponent,
+    NzAlertComponent
   ],
   exports: [ SignInPageComponent],
   providers: [],
