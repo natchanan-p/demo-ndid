@@ -6,8 +6,8 @@ import {HttpClient, HttpErrorResponse, HttpResponse} from '@angular/common/http'
 import {AuthService} from '../../../../service/auth/auth.service';
 import {DataService} from '../../../../service/data-service/data-service.service';
 import {Router} from '@angular/router';
-import {catchError, concatMap, delay, of, switchMap, tap, throwError} from 'rxjs';
-import {ExceptionHandler} from 'winston';
+import { concatMap, delay, of, switchMap, tap} from 'rxjs';
+
 
 
 @Component({
@@ -37,22 +37,27 @@ export class SignInPageComponent implements OnInit {
     private http: HttpClient,
     private dataService: DataService,
     private router: Router,
+    private modal: NzModalService
   ) {
     this.form = this.fb.group({
-      username: ['', [
-        Validators.required,
-        Validators.pattern(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)  // Correct regular expression
-      ]],
-      password: ['',
-        [Validators.required,
-         Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/)]
-      ]
+      username: ['', {
+        validators: [
+          Validators.required,
+          Validators.pattern(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
+        ],
+        updateOn: 'blur'
+      }],
+      password: ['', {
+        validators: [
+          Validators.required,
+          Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/)
+        ],
+        updateOn: 'blur'
+      }]
     });
-  // (?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}
   }
 
   ngOnInit() {
-    console.log('SignInPageComponent ngOnInit');
   }
 
   validateUsername() {
@@ -63,15 +68,16 @@ export class SignInPageComponent implements OnInit {
     }
   }
 
-  submitForm() {
-    this.loading = true;
-
-    // this.form.controls['password'].addValidators([Validators.pattern(/(?=.*\d)(?=.*[a-z])(?=.*[0-9])(?=.*[!@#$%&*+]).{8,}$/g)])
-
+  validatePassword() {
     const regExpNumber =  RegExp (/(?=.*\d).+$/);
     this.statusHaveNumber = regExpNumber.test(this.form.controls['password'].value);
     const regExpSpecialChr =  RegExp (/(?=.*[!@#$%^&*()_+={}\[\]:;"'<>,.?/|\\`~]).+/);
     this.statusHaveSpecialChr =  regExpSpecialChr.test(this.form.controls['password'].value);
+
+  }
+
+  submitForm() {
+    this.loading = true;
 
     if(this.form.controls['password'].invalid) {
         let content = '';
@@ -86,15 +92,14 @@ export class SignInPageComponent implements OnInit {
           content += '<br>'+this.txtErrorPasswordMin8
         }
 
-        // if(this.statusHaveNumber || this.statusHaveSpecialChr || this.form.controls['password'].value.length) {
-        //   content += '<br>'+this.txtErrorPasswordMin8
-        // }
-        Swal.fire({
-          title: "รหัสผ่านไม่ปลอดภัย",
-          html: content,
-          icon: "error",
-          confirmButtonText: 'ปิด'
-        });
+      this.modal.error({
+        nzTitle: 'รหัสผ่านไม่ปลอดภัย',
+        nzContent: content,
+        nzOkText: 'ตกลง',
+        nzCentered: true
+      });
+        this.loading = false;
+
     } else {
       const username = this.form.controls['username'].value;
       const password = this.form.controls['password'].value;
@@ -108,7 +113,6 @@ export class SignInPageComponent implements OnInit {
             switchMap((response: any) => {
               console.log({response});
               if (response.errorCode === 200) {
-                // บันทึก token และ currentUser
                 this.message = 'ได้รับ Token';
                 this.dataService.set('token', response.token);
                 this.dataService.set('currentUser', response.username);
@@ -118,7 +122,7 @@ export class SignInPageComponent implements OnInit {
                 this.message = response.detail;
 
               }
-              return of(response).pipe(delay(3000)); // delay 3 วินาที
+              return of(response).pipe(delay(3000));
 
             })
           );
@@ -127,7 +131,7 @@ export class SignInPageComponent implements OnInit {
           if (response.errorCode === 200) {
             this.message = 'กำลังเปลี่ยนไปหน้า info';
           }
-          return of(response).pipe(delay(3000)); // delay 3 วินาที
+          return of(response).pipe(delay(3000));
         })
 
       );
@@ -141,47 +145,6 @@ export class SignInPageComponent implements OnInit {
           this.navigateToInfo();
         },
       });
-
-      //
-      // this.authService.signIn(username, password).subscribe({
-      //   next: (result) => {
-      //     console.log('ได้รับ result:', result); // ตรวจสอบ result
-      //     this.dataService.set('token', result.token);
-      //     this.dataService.set('currentUser', result.username)
-      //     this.message = result; // อัปเดต message
-      //     this.loading = false;
-      //   },
-      //   error: (error) => {
-      //     this.message = 'เกิดข้อผิดพลาดในการเรียก API';
-      //     this.loading = false;
-      //     throw error;
-      //   },
-      //   complete: () => {
-      //     console.log('กระบวนการเสร็จสิ้น'); // ตรวจสอบ complete
-      //     this.message = 'กำลังเปลี่ยนไปหน้า info';
-      //     this.navigateToInfo();
-      //   },
-      // });
-      // console.log('กำลังเรียกไปที่ api')
-      // this.authService.signIn(username, password).subscribe({
-      //   next: (result) => {
-      //     console.log('next')
-      //     this.message = result;
-      //     this.loading = false;
-      //   },
-      //   error: (error) => {
-      //     this.message = 'เกิดข้อผิดพลาดในการเรียก API';
-      //     this.loading = false;
-      //   },
-      //   complete: () => {
-      //     this.message = 'กำลังเปลี่ยนไปหน้า info';
-      //     // ทำการเปลี่ยนหน้าไปที่ info หลังจากเสร็จสิ้น
-      //     // this.navigateToInfo();
-      //   },
-      // })
-      // this.encryptPassword().then((result) => {
-      //   console.log(result);
-      // })
     }
   }
 
@@ -191,30 +154,6 @@ export class SignInPageComponent implements OnInit {
 
   validateShowButton() {
     return this.form.controls['username'].invalid || this.form.controls['password'].invalid || !this.statusHaveNumber || !this.statusHaveSpecialChr;
-  }
-
-  async encryptPassword() {
-    const plaintext = new TextEncoder().encode("Hello, world!");
-    // คีย์ลับ 256-bit
-    const key = await crypto.subtle.generateKey(
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["encrypt"]
-    );
-
-    console.log({key})
-
-    // IV ที่ใช้ในการเข้ารหัส
-    const iv = crypto.getRandomValues(new Uint8Array(12));  // 12 bytes for GCM
-
-    // การเข้ารหัส
-    const encrypted = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      plaintext
-    );
-    console.log({encrypted})
-    return encrypted;
   }
 
 }

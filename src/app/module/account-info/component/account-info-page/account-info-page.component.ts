@@ -1,6 +1,4 @@
-import {ChangeDetectorRef, Component, NgZone} from '@angular/core';
-import { ACCOUNT_INFO } from '../../../../shared/constant/labels.constant'
-import { ERROR_MESSAGES } from '../../../../shared/constant/error-message.constant';
+import { Component, NgZone} from '@angular/core';
 import {Router} from '@angular/router';
 import {DataService} from '../../../../service/data-service/data-service.service';
 

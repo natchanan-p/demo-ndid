@@ -1,25 +1,18 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse} from '@angular/common/http';
-import {catchError, concatMap, delay, from, interval, Observable, of, switchMap, takeUntil, tap} from 'rxjs';
-import * as CryptoJS from 'crypto-js';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
+import {catchError, from, Observable, of, switchMap} from 'rxjs';
 import {DataService} from '../data-service/data-service.service';
-// crypto-js.d.ts
-declare module 'crypto-js' {
-  namespace mode {
-    const GCM: any;
-  }
-}
+// declare module 'crypto-js' {
+//   namespace mode {
+//     const GCM: any;
+//   }
+// }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  ALGORITHM = "AES-GCM";
-  HASH = "SHA-256";
-  KEY_SIZE = 256;
-  ITERATION_COUNT = 100000;
-  secretKey = 'top_secret';
-  textEncoder = new TextEncoder()
+
   message: string = '';
   constructor(
     private http: HttpClient,

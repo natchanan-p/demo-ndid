@@ -56,5 +56,11 @@ nz-footer {
   width: 50%;
 }
 
+::ng-deep .swal2-container {
+  position: fixed;
+  z-index: 9999;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
 
